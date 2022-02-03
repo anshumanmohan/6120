@@ -2,6 +2,8 @@ import json
 import sys
 import copy
 
+from count_jmp_br import count_jmp_br
+
 
 def never_used_one_pass(prog_arg):
     prog = copy.deepcopy(prog_arg)  # want CBN behavior...
@@ -41,6 +43,8 @@ def overwritten_before_use_one_pass(prog_arg):
 
 def tdce():
     prog1 = json.load(sys.stdin)
+    if count_jmp_br(prog1) > 0:
+        sys.exit('This implementation does not support jmp/br.')
     prog2 = overwritten_before_use_one_pass(never_used_one_pass(prog1))
     while (prog1 != prog2):
         prog1 = prog2
