@@ -3,7 +3,7 @@ import sys
 import copy
 
 
-def tdce_one_pass(prog_arg):
+def never_used_one_pass(prog_arg):
     prog = copy.deepcopy(prog_arg)  # want CBN behavior...
     # print('starting!')
     for func in prog['functions']:
@@ -18,12 +18,33 @@ def tdce_one_pass(prog_arg):
     return prog
 
 
+def overwritten_before_use_one_pass(prog_arg):
+    prog = copy.deepcopy(prog_arg)  # want CBN behavior...
+    for func in prog['functions']:
+        def_unused = {}  # defined but not yet used
+        for instr in func['instrs']:
+
+            if 'args' in instr:
+                for arg in instr['args']:
+                    # print(f'{arg} just got used')
+                    if arg in def_unused:
+                        def_unused.pop(arg)  # these args just got used
+
+            if 'dest' in instr:
+                var = instr['dest']  # we're assigning to this var
+                # print(f'{var} just got assigned')
+                if var in def_unused:
+                    func['instrs'].remove(def_unused[var])
+                def_unused[var] = instr
+    return prog
+
+
 def tdce():
     prog1 = json.load(sys.stdin)
-    prog2 = tdce_one_pass(prog1)
+    prog2 = overwritten_before_use_one_pass(never_used_one_pass(prog1))
     while (prog1 != prog2):
         prog1 = prog2
-        prog2 = tdce_one_pass(prog1)
+        prog2 = overwritten_before_use_one_pass(never_used_one_pass(prog1))
     json.dump(prog1, sys.stdout)
 
 
