@@ -1,8 +1,11 @@
 import json
 import sys
+import copy
 
 
-def tdce_one_pass(prog):
+def tdce_one_pass(prog_arg):
+    prog = copy.deepcopy(prog_arg)  # want CBN behavior...
+    # print('starting!')
     for func in prog['functions']:
         used = set()
         for instr in func['instrs']:
