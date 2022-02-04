@@ -43,12 +43,15 @@ def overwritten_before_use_one_pass(prog_arg):
 
 def tdce():
     prog1 = json.load(sys.stdin)
-    if count_jmp_br(prog1) > 0:
-        sys.exit('This implementation does not support jmp/br.')
-    prog2 = overwritten_before_use_one_pass(never_used_one_pass(prog1))
-    while (prog1 != prog2):
-        prog1 = prog2
+    if count_jmp_br(prog1) == 0:
+        # This implementation does not support jmp/br.
+        # The meat of the algorithm is only implemented once we're sure
+        # we're free of these kinds of control flow.
+        # In other cases, we simply dump out the original program.
         prog2 = overwritten_before_use_one_pass(never_used_one_pass(prog1))
+        while (prog1 != prog2):
+            prog1 = prog2
+            prog2 = overwritten_before_use_one_pass(never_used_one_pass(prog1))
     json.dump(prog1, sys.stdout)
 
 
