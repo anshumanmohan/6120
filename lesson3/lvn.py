@@ -59,15 +59,14 @@ def lvn_one_pass(prog):
 
             if 'dest' not in instr:
                 # If it doesnt have a dest, it can't add to the table/cloud
-                # Just rewrite it according to the table/cloud as it stands
+                # Just rewrite it according to the table/cloud as they are
 
                 # so far, only print has no dest...
                 assert instr['op'] == 'print'
                 arg = instr['args'][0]
                 row = cloud[arg]
                 _, home = get_val_and_home(table, row)
-                new_instr = {'args': [home],
-                             'op': 'print'}
+                new_instr = {'args': [home], 'op': 'print'}
                 func['instrs'][i] = new_instr
                 # print(f"I'm gonna replace {instr} with {new_instr}")
                 continue
