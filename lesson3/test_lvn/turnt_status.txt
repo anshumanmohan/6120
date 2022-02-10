@@ -6,7 +6,8 @@ not ok 2 - clobber.bril
 ok 3 - combo.bril
 ok 4 - commute.bril
 ok 5 - diamond.bril
-ok 6 - divide-by-zero.bril
+not ok 6 - divide-by-zero.bril
+# exit code: 1
 ok 7 - double-pass.bril
 ok 8 - double.bril
 not ok 9 - fold-comparisons.bril
