@@ -81,15 +81,14 @@ def lvn_one_pass(prog):
                 value = (op,)
                 if 'args' in instr:
                     for arg in instr['args']:
-                        # print(f"Gonna look in the cloud re: instr {instr}")
+                        # print(f"Gonna look in the {cloud} re: instr {instr}")
                         value = value + (cloud[arg],)
                 value = canonicalize(value)
 
             if table.shape[0] > 0 and True in table['value'].isin([value]).values:
                 # print(f"I think {value} is precomputed in \n{tabulate(table)}")
-
                 # this very value has been computed in the past
-                (index, home) = get_index_and_home(table, value)
+                (row, home) = get_index_and_home(table, value)
                 # and it lives here!
 
                 new_instr = {'args': [home],
@@ -102,7 +101,11 @@ def lvn_one_pass(prog):
                 # this is a new value
 
                 # if variable will be overwritten...
-                # pass
+                for j in range(i+1, len(func['instrs'])):
+                    future_instr = func['instrs'][j]
+                    if 'dest' in future_instr and future_instr['dest'] == dest:
+                        dest = dest + "'"
+                        break
 
                 # add it to the table
                 table = add_row_to_table(table, value, dest)
@@ -119,10 +122,12 @@ def lvn_one_pass(prog):
                                  'type': instr['type']}
 
             # regardless:
-            # print(f"housekeeping cloud for {instr}")
-            cloud[dest] = row  # housekeep the cloud
+            cloud[instr['dest']] = row  # housekeep the cloud
+            # print(f"\nFinished with {instr}")
             # print(f"The cloud now looks like:{cloud}")
             # print(f"The table now looks like:\n{tabulate(table)}")
+            # if instr != new_instr:
+            #     print(f"The instr now looks like:{new_instr}")
 
             func['instrs'][i] = new_instr
             # print(func)
