@@ -70,6 +70,16 @@ def do_math(table, value, instr):
                  'op': 'const',
                  'type': instr['type'],
                  'value': ans}
+
+    if op == 'id' and row_is_const(table, rest[0][0]):
+        ans = get_const(table, rest[0][0])
+        # short-circuit the value and the instr; just use constants
+        value = ('const', [ans])
+        instr = {'dest': instr['dest'],
+                 'op': 'const',
+                 'type': instr['type'],
+                 'value': ans}
+
     return (value, instr)
 
 
