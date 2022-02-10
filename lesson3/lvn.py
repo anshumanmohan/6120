@@ -30,6 +30,14 @@ def add_row_to_table(table, value, home):
     return table
 
 
+def canonicalize(value):
+    op = value[0]
+    rest = value[1:]
+    if op in ['add', 'mul']:
+        rest = sorted(rest)
+    return (op,) + (rest,)
+
+
 def lvn_one_pass(prog):
     for func in prog['functions']:
         # A value_tuple is:
@@ -76,6 +84,7 @@ def lvn_one_pass(prog):
                     for arg in instr['args']:
                         # print(f"Gonna look in the cloud re: instr {instr}")
                         value = value + (cloud[arg],)
+                value = canonicalize(value)
 
             if table.shape[0] > 0 and True in table['value'].isin([value]).values:
                 # print(f"I think {value} is precomputed in \n{tabulate(table)}")
