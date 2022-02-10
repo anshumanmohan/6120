@@ -43,19 +43,19 @@ def get_const(table, index):
 
 def canonicalize(value):
     op = value[0]
-    rest = value[1:]
+    args = value[1:]
     if op in ['add', 'mul']:
-        rest = sorted(rest)
-    return (op,) + (rest,)
+        args = sorted(args)
+    return (op,) + (args,)
 
 
 def do_math(table, value, instr):
     # do math on constants if possible
     op = value[0]
-    rest = value[1:][0]
-    if op in ['add', 'mul', 'sub', 'div'] and row_is_const(table, rest[0]) and row_is_const(table, rest[1]):
-        arg1 = get_const(table, rest[0])
-        arg2 = get_const(table, rest[1])
+    args = value[1:][0]
+    if op in ['add', 'mul', 'sub', 'div'] and row_is_const(table, args[0]) and row_is_const(table, args[1]):
+        arg1 = get_const(table, args[0])
+        arg2 = get_const(table, args[1])
         if op == 'add':
             ans = arg1 + arg2
         elif op == 'mul':
@@ -74,7 +74,7 @@ def do_math(table, value, instr):
                  'type': instr['type'],
                  'value': ans}
 
-    if op in ['eq', 'le', 'ge'] and rest[0] == rest[0]:
+    elif op in ['eq', 'le', 'ge'] and args[0] == args[0]:
         # of course we really want to compare the value deep within,
         # but we can also take an easy win when
         # the row numbers are literally identical
@@ -84,9 +84,9 @@ def do_math(table, value, instr):
                  'type': 'bool',
                  'value': 'True'}
 
-    if op in ['eq', 'lt', 'gt', 'le', 'ge'] and row_is_const(table, rest[0]) and row_is_const(table, rest[1]):
-        arg1 = get_const(table, rest[0])
-        arg2 = get_const(table, rest[1])
+    elif op in ['eq', 'lt', 'gt', 'le', 'ge'] and row_is_const(table, args[0]) and row_is_const(table, args[1]):
+        arg1 = get_const(table, args[0])
+        arg2 = get_const(table, args[1])
         if op == 'eq':
             ans = arg1 == arg2
         elif op == 'lt':
@@ -110,8 +110,43 @@ def do_math(table, value, instr):
                  'type': 'bool',
                  'value': ans_str}
 
-    if op == 'id' and row_is_const(table, rest[0]):
-        ans = get_const(table, rest[0])
+    elif op in ['and', 'or'] and row_is_const(table, args[0]) and row_is_const(table, args[1]):
+        arg1 = get_const(table, args[0])
+        arg2 = get_const(table, args[1])
+        if op == 'and':
+            ans = arg1 and arg2
+        else:
+            ans = arg1 or arg2
+
+        if ans:
+            ans_str = 'True'
+        else:
+            ans_str = 'False'
+
+        # short-circuit the value and the instr; just use constants
+        value = ('const', [ans_str])
+        instr = {'dest': instr['dest'],
+                 'op': 'const',
+                 'type': 'bool',
+                 'value': ans_str}
+
+    elif op == 'not' and row_is_const(table, args[0]):
+        arg = not get_const(table, args[0])
+
+        if arg:
+            ans_str = 'True'
+        else:
+            ans_str = 'False'
+
+        # short-circuit the value and the instr; just use constants
+        value = ('const', [ans_str])
+        instr = {'dest': instr['dest'],
+                 'op': 'const',
+                 'type': 'bool',
+                 'value': ans_str}
+
+    elif op == 'id' and row_is_const(table, args[0]):
+        ans = get_const(table, args[0])
         # short-circuit the value and the instr; just use constants
         value = ('const', [ans])
         instr = {'dest': instr['dest'],
