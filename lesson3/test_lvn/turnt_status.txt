@@ -1,25 +1,42 @@
 1..18
+
 not ok 1 - clobber-fold.bril
 # exit code: 1
+Turnt error?
+
 not ok 2 - clobber.bril
 # exit code: 1
+Turnt error?
+
 ok 3 - combo.bril
 ok 4 - commute.bril
 ok 5 - diamond.bril
+
 not ok 6 - divide-by-zero.bril
 # exit code: 1
+Curious how I should handle it...
+
 ok 7 - double-pass.bril
 ok 8 - double.bril
+
 not ok 9 - fold-comparisons.bril
 # exit code: 1
-not ok 10 - idchain-prop.bril
+Args!
+
+ok 10 - idchain-prop.bril
 ok 11 - idchain.bril
+
 not ok 12 - logical-operators.bril
 # exit code: 1
+Args!
+
 ok 13 - reassign-dkp.bril
 ok 14 - reassign.bril
 ok 15 - redundant.bril
+
 not ok 16 - rename-fold.bril
 # exit code: 1
+Turnt error?
+
 ok 17 - simple.bril
 ok 18 - skipped.bril
