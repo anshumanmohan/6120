@@ -24,8 +24,10 @@ def get_index_and_home(table, value):
 
 
 def add_row_to_table(table, value, home):
-    new = pd.DataFrame([[value, home]], columns=['value', 'home'])
-    return pd.concat([table, new])
+    len = table.shape[0]
+    new = pd.DataFrame([[value, home]], index=[len], columns=['value', 'home'])
+    table = pd.concat([table, new])
+    return table
 
 
 def lvn_one_pass(prog):
@@ -34,64 +36,90 @@ def lvn_one_pass(prog):
         # a list n+1 long:
         #   a string op code, and
         #   n integers representing table row numbers for the arguments
-        table = pd.DataFrame(columns=['value', 'home'])
+        table = pd.DataFrame()
         # In each row: value_tuple, its string home
         cloud = {}  # a dict from string varname to its int row number in table
 
-        for instr in func['instrs']:
+        for i in range(len(func['instrs'])):
+
+            instr = func['instrs'][i]
+            # print(f"processing instruction {instr}")
 
             if 'label' in instr:
-                # we screen away jmp and br, so we can just ignore labels
+                # we've screened away jmp and br, so we can just ignore labels
+                continue
+
+            if 'dest' not in instr:
+                # If it doesnt have a dest, it can't add to the table/cloud
+                # Just rewrite it according to the table/cloud as it stands
+
+                # so far, only print has no dest...
+                assert instr['op'] == 'print'
+                arg = instr['args'][0]
+                row = cloud[arg]
+                _, home = get_val_and_home(table, row)
+                new_instr = {'args': [home],
+                             'op': 'print'}
+                func['instrs'][i] = new_instr
+                # print(f"I'm gonna replace {instr} with {new_instr}")
                 continue
 
             op = instr['op']
+            dest = instr['dest']
 
-        # we construct the value tuple with references to row numbers
+            # we construct the value tuple with references to row numbers
             if op == 'const':
-                # special-casing this
-                value = (op, instr['value'])
+                value = (op, instr['value'])  # special-casing this
             else:
                 value = (op,)
                 if 'args' in instr:
                     for arg in instr['args']:
+                        # print(f"Gonna look in the cloud re: instr {instr}")
                         value = value + (cloud[arg],)
 
             if table.shape[0] > 0 and True in table['value'].isin([value]).values:
+                # print(f"I think {value} is precomputed in \n{tabulate(table)}")
+
                 # this very value has been computed in the past
-                # print("I think the value")
-                # print(value)
-                # print(" is in table ")
-                # print(tabulate(table))
                 (index, home) = get_index_and_home(table, value)
-                # it lives here!
-                new_instr = {'args': [home], 'op': 'id'}
-                # hopefully this is kosher json...
+                # and it lives here!
+
+                new_instr = {'args': [home],
+                             'dest': dest,
+                             'op': 'id',
+                             'type': instr['type']}
+                # print(f"I'm gonna replace {instr} with {new_instr}")
 
             else:
                 # this is a new value
-                if 'dest' in instr:
-                    dest = instr['dest']
 
-                    # if variable will be overwritten...
-                    # pass
+                # if variable will be overwritten...
+                # pass
 
-                    # add it to the table
-                    table = add_row_to_table(table, value, dest)
-                    row = table.shape[0]  # here's where it went
+                # add it to the table
+                table = add_row_to_table(table, value, dest)
+                row = table.shape[0]-1  # here's where it went
 
-                    if op == 'const':
-                        new_instr = instr
-                    else:
-                        new_instr = {'args':
-                                     map((lambda a: table['homes'][cloud[a]]),
-                                         instr['args']),
-                                     'op': op}
+                if op == 'const':
+                    new_instr = instr
+                else:
+                    new_instr = {'args':
+                                 list(map((lambda a: table['home'][cloud[a]]),
+                                          instr['args'])),
+                                 'dest': dest,
+                                 'op': op,
+                                 'type': instr['type']}
 
             # regardless:
-            if 'dest' in instr:
-                cloud[instr['dest']] = row  # housekeep the cloud
-            instr = new_instr  # hopefully this edit is in-place...
+            # print(f"housekeeping cloud for {instr}")
+            cloud[dest] = row  # housekeep the cloud
+            # print(f"The cloud now looks like:{cloud}")
+            # print(f"The table now looks like:\n{tabulate(table)}")
 
+            func['instrs'][i] = new_instr
+            # print(func)
+
+    # print("RETURNING")
     return prog
 
 
@@ -107,6 +135,7 @@ def iterate_to_convergence(f, input):
     # Apply f to input until convergence
     output = f(input)
     while (input != output):
+        # print("ITERATING AGAIN")
         input = output
         output = f(input)
     return output
@@ -120,6 +149,7 @@ def lvn():
         # we're free of these kinds of control flow.
         # In other cases, we simply return the original program.
         prog = iterate_to_convergence(try_everything_one_pass, prog)
+
     json.dump(prog, sys.stdout)
 
 
