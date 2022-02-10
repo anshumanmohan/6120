@@ -32,7 +32,7 @@ def add_row_to_table(table, value, home):
 
 def row_is_const(table, index):
     value, _ = get_val_and_home(table, index)
-    return value[0] == 'const'
+    return value != () and value[0] == 'const'
 
 
 def get_const(table, index):
@@ -74,6 +74,42 @@ def do_math(table, value, instr):
                  'type': instr['type'],
                  'value': ans}
 
+    if op in ['eq', 'le', 'ge'] and rest[0][0] == rest[0][1]:
+        # of course we want to compare the value deep within,
+        # but we can also take an easy win when
+        # the row numbers are literally identical
+        value = ('const', ['True'])
+        instr = {'dest': instr['dest'],
+                 'op': 'const',
+                 'type': 'bool',
+                 'value': 'True'}
+
+    if op in ['eq', 'lt', 'gt', 'le', 'ge'] and row_is_const(table, rest[0][0]) and row_is_const(table, rest[0][1]):
+        arg1 = get_const(table, rest[0][0])
+        arg2 = get_const(table, rest[0][1])
+        if op == 'eq':
+            ans = arg1 == arg2
+        elif op == 'lt':
+            ans = arg1 < arg2
+        elif op == 'gt':
+            ans = arg1 > arg2
+        elif op == 'le':
+            ans = arg1 <= arg2
+        else:
+            ans = arg1 >= arg2
+
+        if ans:
+            ans_str = 'True'
+        else:
+            ans_str = 'False'
+
+        # short-circuit the value and the instr; just use constants
+        value = ('const', [ans_str])
+        instr = {'dest': instr['dest'],
+                 'op': 'const',
+                 'type': 'bool',
+                 'value': ans_str}
+
     if op == 'id' and row_is_const(table, rest[0][0]):
         ans = get_const(table, rest[0][0])
         # short-circuit the value and the instr; just use constants
@@ -94,6 +130,16 @@ def lvn_one_pass(prog):
         table = pd.DataFrame()
         # In each row: value_tuple, its string home
         cloud = {}  # a dict from string varname to its int row number in table
+
+        # function arguments need to go into the cloud and the table
+        # but we don't want them to get folded in or propagated...
+        if 'args' in func:
+            for arg in func['args']:
+                dest = arg['name']
+                type = arg['type']
+                table = add_row_to_table(table, (), dest)
+                row = table.shape[0]-1  # here's where it went
+                cloud[dest] = row
 
         for i in range(len(func['instrs'])):
 
@@ -129,7 +175,7 @@ def lvn_one_pass(prog):
                         value = value + (cloud[arg],)
                 value = canonicalize(value)
 
-            if table.shape[0] > 0 and True in table['value'].isin([value]).values:
+            if op != 'const' and table.shape[0] > 0 and True in table['value'].isin([value]).values:
                 # if this very value has been computed in the past
                 (row, home) = get_index_and_home(table, value)
                 # we find where it lives
@@ -143,7 +189,9 @@ def lvn_one_pass(prog):
                 # this is a new value
 
                 # do math simplifications if possible
+                # print(f"Gonna try to do math on {value}")
                 (value, instr) = do_math(table, value, instr)
+
                 # note the in-place clobber
 
                 # if dest var will be overwritten, rename it prophylactically
@@ -159,8 +207,8 @@ def lvn_one_pass(prog):
 
                 # now we'll "pretty print" the new instr
                 # by reading from the cloud and the table
-                if instr['op'] == 'const':
-                    new_instr = instr
+                if row_is_const(table, row):
+                    new_instr = instr  # no need to pretty-print
                 else:
                     new_instr = {'args':
                                  list(map((lambda a: table['home'][cloud[a]]),
@@ -175,7 +223,7 @@ def lvn_one_pass(prog):
             # print(f"\nFinished with {instr}")
             # print(f"The cloud now looks like:{cloud}")
             # print(f"The table now looks like:\n{tabulate(table)}")
-            # if instr != new_instr:
+            # # if instr != new_instr:
             #     print(f"The instr now looks like:{new_instr}")
 
             func['instrs'][i] = new_instr
@@ -187,7 +235,8 @@ def try_everything_one_pass(prog_arg):
     # In this method we will list all our strategies
     # One pass only: iterate this method to convergence!
     prog = copy.deepcopy(prog_arg)  # want CBN behavior
-    overwritten_before_use_one_pass(never_used_one_pass(lvn_one_pass(prog)))
+    # overwritten_before_use_one_pass(never_used_one_pass(lvn_one_pass(prog)))
+    lvn_one_pass(prog)
     return prog
 
 
