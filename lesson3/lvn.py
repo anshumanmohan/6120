@@ -5,6 +5,8 @@ from count_jmp_br import count_jmp_br
 from tdce import *
 from tabulate import tabulate
 
+# DATAFRAME ACCESS, MODIFICATION, HELPERS
+
 
 def get_val_and_home(table, index):
     # given the index, return the value and the home on that row
@@ -16,8 +18,6 @@ def get_index_and_home(table, value):
     # note that this is unique because we are carefully keeping it so;
     # Python makes no guarantee of uniquenes
     row = table.loc[table['value'] == value]
-    # print('looking for value in table:')
-    # print(value)
     assert row.shape[0] == 1  # check that we got a single-row table
     index = row.index.values[0]
     return (index, row.at[index, 'home'])
@@ -85,10 +85,9 @@ def do_math(table, value, instr):
 
 def lvn_one_pass(prog):
     for func in prog['functions']:
-        # A value_tuple is:
-        # a list n+1 long:
-        #   a string op code, and
-        #   n integers representing table row numbers for the arguments
+        # After canonicalization, a value_tuple is:
+        # a string op code, and
+        # a list of n integers representing table row numbers for the arguments
         table = pd.DataFrame()
         # In each row: value_tuple, its string home
         cloud = {}  # a dict from string varname to its int row number in table
@@ -96,24 +95,22 @@ def lvn_one_pass(prog):
         for i in range(len(func['instrs'])):
 
             instr = func['instrs'][i]
-            # print(f"processing instruction {instr}")
 
             if 'label' in instr:
-                # we've screened away jmp and br, so we can just ignore labels
+                # we've screened away jmp and br,
+                # so we can just leave labels untouched
                 continue
 
             if 'dest' not in instr:
                 # If it doesnt have a dest, it can't add to the table/cloud
                 # Just rewrite it according to the table/cloud as they are
 
-                # so far, only print has no dest...
-                assert instr['op'] == 'print'
+                assert instr['op'] == 'print'  # AFAIK, only print has no dest
                 arg = instr['args'][0]
                 row = cloud[arg]
                 _, home = get_val_and_home(table, row)
                 new_instr = {'args': [home], 'op': 'print'}
                 func['instrs'][i] = new_instr
-                # print(f"I'm gonna replace {instr} with {new_instr}")
                 continue
 
             op = instr['op']
@@ -126,39 +123,39 @@ def lvn_one_pass(prog):
                 value = (op,)
                 if 'args' in instr:
                     for arg in instr['args']:
-                        # print(f"Gonna look in the {cloud} re: instr {instr}")
                         value = value + (cloud[arg],)
                 value = canonicalize(value)
 
             if table.shape[0] > 0 and True in table['value'].isin([value]).values:
-                # print(f"I think {value} is precomputed in \n{tabulate(table)}")
-                # this very value has been computed in the past
+                # if this very value has been computed in the past
                 (row, home) = get_index_and_home(table, value)
-                # and it lives here!
-
+                # we find where it lives
+                # and replace it with an id instr
                 new_instr = {'args': [home],
                              'dest': dest,
                              'op': 'id',
                              'type': instr['type']}
-                # print(f"I'm gonna replace {instr} with {new_instr}")
 
             else:
                 # this is a new value
 
                 # do math simplifications if possible
                 (value, instr) = do_math(table, value, instr)
+                # note the in-place clobber
 
-                # if variable will be overwritten...
+                # if dest var will be overwritten, rename it prophylactically
                 for j in range(i+1, len(func['instrs'])):
                     future_instr = func['instrs'][j]
                     if 'dest' in future_instr and future_instr['dest'] == dest:
                         dest = dest + "'"
-                        break
+                        break  # break out of this j-forloop
 
                 # add it to the table
                 table = add_row_to_table(table, value, dest)
                 row = table.shape[0]-1  # here's where it went
 
+                # now we'll "pretty print" the new instr
+                # by reading from the cloud and the table
                 if instr['op'] == 'const':
                     new_instr = instr
                 else:
@@ -169,8 +166,9 @@ def lvn_one_pass(prog):
                                  'op': op,
                                  'type': instr['type']}
 
-            # regardless:
+            # regardless of whether the value was old or new:
             cloud[instr['dest']] = row  # housekeep the cloud
+
             # print(f"\nFinished with {instr}")
             # print(f"The cloud now looks like:{cloud}")
             # print(f"The table now looks like:\n{tabulate(table)}")
@@ -178,9 +176,7 @@ def lvn_one_pass(prog):
             #     print(f"The instr now looks like:{new_instr}")
 
             func['instrs'][i] = new_instr
-            # print(func)
 
-    # print("RETURNING")
     return prog
 
 
@@ -196,7 +192,6 @@ def iterate_to_convergence(f, input):
     # Apply f to input until convergence
     output = f(input)
     while (input != output):
-        # print("ITERATING AGAIN")
         input = output
         output = f(input)
     return output
