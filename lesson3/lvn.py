@@ -63,6 +63,9 @@ def do_math(table, value, instr):
         elif op == 'sub':
             ans = arg1 - arg2
         else:
+            if arg2 == 0:
+                return (value, instr)
+                # return the instr unchanged instead of dividing by 0
             ans = arg1 / arg2
         # short-circuit the value and the instr; just use constants
         value = ('const', [ans])

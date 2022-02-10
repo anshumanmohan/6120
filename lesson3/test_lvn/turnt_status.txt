@@ -11,11 +11,7 @@ Turnt error?
 ok 3 - combo.bril
 ok 4 - commute.bril
 ok 5 - diamond.bril
-
-not ok 6 - divide-by-zero.bril
-# exit code: 1
-Curious how I should handle it...
-
+ok 6 - divide-by-zero.bril
 ok 7 - double-pass.bril
 ok 8 - double.bril
 
