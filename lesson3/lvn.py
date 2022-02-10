@@ -30,12 +30,47 @@ def add_row_to_table(table, value, home):
     return table
 
 
+def row_is_const(table, index):
+    value, _ = get_val_and_home(table, index)
+    return value[0] == 'const'
+
+
+def get_const(table, index):
+    value, _ = get_val_and_home(table, index)
+    assert value[0] == 'const'
+    return value[1][0]
+
+
 def canonicalize(value):
     op = value[0]
     rest = value[1:]
     if op in ['add', 'mul']:
         rest = sorted(rest)
     return (op,) + (rest,)
+
+
+def do_math(table, value, instr):
+    # do math on constants if possible
+    op = value[0]
+    rest = value[1:]
+    if op in ['add', 'mul', 'sub', 'div'] and row_is_const(table, rest[0][0]) and row_is_const(table, rest[0][1]):
+        arg1 = get_const(table, rest[0][0])
+        arg2 = get_const(table, rest[0][1])
+        if op == 'add':
+            ans = arg1 + arg2
+        elif op == 'mul':
+            ans = arg1 * arg2
+        elif op == 'sub':
+            ans = arg1 - arg2
+        else:
+            ans = arg1 / arg2
+        # short-circuit the value and the instr; just use constants
+        value = ('const', [ans])
+        instr = {'dest': instr['dest'],
+                 'op': 'const',
+                 'type': instr['type'],
+                 'value': ans}
+    return (value, instr)
 
 
 def lvn_one_pass(prog):
@@ -76,7 +111,7 @@ def lvn_one_pass(prog):
 
             # we construct the value tuple with references to row numbers
             if op == 'const':
-                value = (op, instr['value'])  # special-casing this
+                value = (op, [instr['value']])  # special-casing this
             else:
                 value = (op,)
                 if 'args' in instr:
@@ -100,6 +135,9 @@ def lvn_one_pass(prog):
             else:
                 # this is a new value
 
+                # do math simplifications if possible
+                (value, instr) = do_math(table, value, instr)
+
                 # if variable will be overwritten...
                 for j in range(i+1, len(func['instrs'])):
                     future_instr = func['instrs'][j]
@@ -111,7 +149,7 @@ def lvn_one_pass(prog):
                 table = add_row_to_table(table, value, dest)
                 row = table.shape[0]-1  # here's where it went
 
-                if op == 'const':
+                if instr['op'] == 'const':
                     new_instr = instr
                 else:
                     new_instr = {'args':
