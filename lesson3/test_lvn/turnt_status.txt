@@ -1,0 +1,24 @@
+1..18
+not ok 1 - clobber-fold.bril
+# exit code: 1
+not ok 2 - clobber.bril
+# exit code: 1
+ok 3 - combo.bril
+ok 4 - commute.bril
+ok 5 - diamond.bril
+ok 6 - divide-by-zero.bril
+ok 7 - double-pass.bril
+ok 8 - double.bril
+not ok 9 - fold-comparisons.bril
+# exit code: 1
+not ok 10 - idchain-prop.bril
+ok 11 - idchain.bril
+not ok 12 - logical-operators.bril
+# exit code: 1
+ok 13 - reassign-dkp.bril
+ok 14 - reassign.bril
+ok 15 - redundant.bril
+not ok 16 - rename-fold.bril
+# exit code: 1
+ok 17 - simple.bril
+ok 18 - skipped.bril
