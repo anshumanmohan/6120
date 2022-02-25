@@ -63,7 +63,7 @@ def improve_dom_one_pass(cfg, entry_label, dom):
     return dom
 
 
-def find_dominators(cfg, entry_label):
+def find_dominators_helper(cfg, entry_label):
     f = partial(improve_dom_one_pass, cfg, entry_label)
     # fix the method to this CFG and this entry label
     doms = init_doms(cfg)
@@ -71,26 +71,29 @@ def find_dominators(cfg, entry_label):
     return (iterate_to_convergence(f, doms))
 
 
+def find_dominators(func):
+
+    # Get the basic block and CFG for this function
+    blocks = form_blocks(func['instrs'])
+    label2block = label_blocks(blocks)
+
+    print("After adding labels, the program looks like:")
+    print_labeled_prog(label2block)
+
+    entry_label = label2block[0][0]
+    # print(f"Its entry label is {entry_label}")
+
+    cfg, _ = get_cfg(label2block)
+
+    return find_dominators_helper(cfg, entry_label)
+
+
 def main():
     # Load the program JSON
     prog = json.load(sys.stdin)
 
-    # Do this for each function
     for func in prog['functions']:
-        # Get the basic block and CFG for this function
-        blocks = form_blocks(func['instrs'])
-        label2block = label_blocks(blocks)
-
-        print("After adding labels, the program looks like:")
-        print_labeled_prog(label2block)
-
-        entry_label = label2block[0][0]
-        # print(f"Its entry label is {entry_label}")
-
-        cfg, _ = get_cfg(label2block)
-
-        doms = find_dominators(cfg, entry_label)
-
+        doms = find_dominators(func)
         print_doms(doms)
 
 

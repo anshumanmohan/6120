@@ -35,19 +35,19 @@ The dominators of loop are:
 	entry
 	loop
 The dominators of body are:
+	body
 	entry
 	loop
-	body
 The dominators of then are:
 	then
+	body
 	entry
 	loop
-	body
 The dominators of endif are:
-	entry
-	loop
 	body
+	entry
 	endif
+	loop
 The dominators of exit are:
 	entry
 	exit

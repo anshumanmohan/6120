@@ -32,23 +32,23 @@ exit:
 The dominators of entry are:
 	entry
 The dominators of loop are:
-	loop
 	entry
+	loop
 The dominators of body are:
-	loop
-	entry
 	body
+	entry
+	loop
 The dominators of then are:
+	body
 	entry
-	loop
 	then
-	body
+	loop
 The dominators of endif are:
-	endif
-	loop
-	entry
 	body
-The dominators of exit are:
-	loop
 	entry
+	loop
+	endif
+The dominators of exit are:
 	exit
+	entry
+	loop
