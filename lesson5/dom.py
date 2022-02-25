@@ -46,22 +46,26 @@ def intersect_list_of_sets(l):
         return set()
 
 
-def improve_dom_one_pass(cfg, dom):
+def improve_dom_one_pass(cfg, entry_label, dom):
     dom = copy.deepcopy(dom)
     for vlabel in cfg.keys():
-        preds = list(cfg[vlabel].predecessors)
-        print(f"I am {vlabel} and my preds are: {preds}")
-        pred_dom_sets = []
-        for pred in preds:
-            print(f"\tI am the pred {pred} and my doms are {dom[pred]}")
-            pred_dom_sets = pred_dom_sets + [dom[pred]]
-            print(f"\tThe running list of pred-doms is now {pred_dom_sets}")
-        dom[vlabel] = {vlabel}.union(intersect_list_of_sets(pred_dom_sets))
+        if vlabel == entry_label:
+            dom[vlabel] = {vlabel}
+        else:
+            preds = list(cfg[vlabel].predecessors)
+            # print(f"I am {vlabel} and my preds are: {preds}")
+            pred_dom_sets = []
+            for pred in preds:
+                # print(f"\tI am the pred {pred} and my doms are {dom[pred]}")
+                pred_dom_sets = pred_dom_sets + [dom[pred]]
+                # print(f"\tThe list of pred-doms is now {pred_dom_sets}")
+            dom[vlabel] = {vlabel}.union(intersect_list_of_sets(pred_dom_sets))
     return dom
 
 
-def find_dominators(cfg):
-    f = partial(improve_dom_one_pass, cfg)  # fix the method to this CFG
+def find_dominators(cfg, entry_label):
+    f = partial(improve_dom_one_pass, cfg, entry_label)
+    # fix the method to this CFG and this entry label
     doms = init_doms(cfg)
     # pare it down until it stabilizes
     return (iterate_to_convergence(f, doms))
@@ -80,9 +84,12 @@ def main():
         print("After adding labels, the program looks like:")
         print_labeled_prog(label2block)
 
+        entry_label = label2block[0][0]
+        # print(f"Its entry label is {entry_label}")
+
         cfg, _ = get_cfg(label2block)
 
-        doms = find_dominators(cfg)
+        doms = find_dominators(cfg, entry_label)
 
         print_doms(doms)
 

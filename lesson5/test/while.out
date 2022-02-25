@@ -15,14 +15,10 @@ while.finish:
 
 
 The dominators of while.cond are:
-	while.body
 	while.cond
-	while.finish
 The dominators of while.body are:
 	while.body
 	while.cond
-	while.finish
 The dominators of while.finish are:
-	while.body
-	while.cond
 	while.finish
+	while.cond
