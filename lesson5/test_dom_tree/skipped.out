@@ -1,0 +1,15 @@
+After adding labels, the program looks like:
+l0:
+	{'dest': 'a', 'op': 'const', 'type': 'int', 'value': 4}
+	{'dest': 'b', 'op': 'const', 'type': 'int', 'value': 2}
+	{'labels': ['end'], 'op': 'jmp'}
+l1:
+	{'args': ['b'], 'op': 'print'}
+end:
+	{'label': 'end'}
+	{'args': ['a'], 'op': 'print'}
+
+
+The dominators of l0 are:
+The dominators of l1 are:
+The dominators of end are:
