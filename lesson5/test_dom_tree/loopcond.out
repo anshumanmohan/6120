@@ -29,20 +29,38 @@ exit:
 	{'args': ['x'], 'op': 'print'}
 
 
-The dominators of entry are:
-The dominators of loop are:
+entry has no strict dominators.
+The strict dominators of loop are:
 	entry
-The dominators of body are:
+The strict dominators of body are:
 	entry
 	loop
-The dominators of then are:
+The strict dominators of then are:
 	body
 	entry
 	loop
-The dominators of endif are:
+The strict dominators of endif are:
 	body
 	entry
 	loop
-The dominators of exit are:
+The strict dominators of exit are:
+	entry
+	loop
+
+
+The immediate dominators of loop are:
+	entry
+The immediate dominators of body are:
+	entry
+	loop
+The immediate dominators of then are:
+	body
+	entry
+	loop
+The immediate dominators of endif are:
+	body
+	entry
+	loop
+The immediate dominators of exit are:
 	entry
 	loop

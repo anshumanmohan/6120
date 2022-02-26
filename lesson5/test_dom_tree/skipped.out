@@ -10,6 +10,8 @@ end:
 	{'args': ['a'], 'op': 'print'}
 
 
-The dominators of l0 are:
-The dominators of l1 are:
-The dominators of end are:
+l0 has no strict dominators.
+l1 has no strict dominators.
+end has no strict dominators.
+
+

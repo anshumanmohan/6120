@@ -14,8 +14,14 @@ while.finish:
 	{'args': ['a'], 'op': 'print'}
 
 
-The dominators of while.cond are:
-The dominators of while.body are:
+while.cond has no strict dominators.
+The strict dominators of while.body are:
 	while.cond
-The dominators of while.finish are:
+The strict dominators of while.finish are:
+	while.cond
+
+
+The immediate dominators of while.body are:
+	while.cond
+The immediate dominators of while.finish are:
 	while.cond

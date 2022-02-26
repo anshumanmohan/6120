@@ -3,12 +3,15 @@ from functools import partial
 import copy
 
 
-def print_doms(doms):
+def print_doms(doms, s):
     print("\n")
     for v in doms:
-        print(f"The dominators of {v} are:")
-        for b in doms[v]:
-            print(f"\t{b}")
+        if doms[v]:
+            print(f"The {s}dominators of {v} are:")
+            for b in doms[v]:
+                print(f"\t{b}")
+        else:
+            print(f"{v} has no {s}dominators.")
 
 
 def print_labeled_prog(label2block):
@@ -63,7 +66,7 @@ def improve_dom_one_pass(cfg, entry_label, dom):
     return dom
 
 
-def find_dominators_helper(cfg, entry_label):
+def find_doms_helper(cfg, entry_label):
     f = partial(improve_dom_one_pass, cfg, entry_label)
     # fix the method to this CFG and this entry label
     doms = init_doms(cfg)
@@ -71,7 +74,7 @@ def find_dominators_helper(cfg, entry_label):
     return (iterate_to_convergence(f, doms))
 
 
-def find_dominators(func):
+def find_doms(func):
 
     # Get the basic block and CFG for this function
     blocks = form_blocks(func['instrs'])
@@ -85,7 +88,7 @@ def find_dominators(func):
 
     cfg, _ = get_cfg(label2block)
 
-    return find_dominators_helper(cfg, entry_label)
+    return find_doms_helper(cfg, entry_label)
 
 
 def main():
@@ -93,8 +96,8 @@ def main():
     prog = json.load(sys.stdin)
 
     for func in prog['functions']:
-        doms = find_dominators(func)
-        print_doms(doms)
+        doms = find_doms(func)
+        print_doms(doms, "")
 
 
 if __name__ == '__main__':
