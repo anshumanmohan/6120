@@ -3,7 +3,7 @@ My work is in two files:
 - dom.py, where I construct the basic domination relation
 - dom_extensions.py, where I use the basic relation to construct relations for strict domination, immediate domination, and the domination frontier. 
 
-It was a reasonably straightforward process, more or less proceeding as discussed in class. I found myself wrestling with Python a fair bit; I'm realizing that at heart I really am a functional programmer and so I tend to want/expect things like partial application and immutability. That said, who among us can argue against a Python gem like "if v1 in strict_doms[v2] and (v1 not in strict_doms[v3] for v3 in strict_doms[v2])"? It's poetry, dammit. 
+It was a reasonably straightforward process, more or less proceeding as discussed in class. I found myself wrestling with Python a fair bit; I'm realizing that at heart I really am a functional programmer and so I tend to want/expect things like partial application and immutability. That said, who among us can argue against a Python gem like `if v1 in strict_doms[v2] and (v1 not in strict_doms[v3] for v3 in strict_doms[v2])`? It's poetry, dammit. 
 
 I tested my work using Turnt the whole time, borrowing from the course repository's examples/test/dom/ and also adding skipped.bril from a previous lesson. I'm glad I did, since it proved to be an interesting example (see below). Compared to what others seem to have done re: testing, my work is quite meagre, essentially just "testing by eye". Plus, it wasn't even that easy: variations in Python's set-ordering meant that Turnt [repeatedly threw false alarms](https://github.com/anshumanmohan/6120/blob/master/lesson5/pain.png).
 
