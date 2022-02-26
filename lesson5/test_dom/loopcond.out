@@ -35,13 +35,13 @@ The dominators of loop are:
 	entry
 	loop
 The dominators of body are:
-	entry
 	loop
+	entry
 	body
 The dominators of then are:
-	loop
-	entry
 	then
+	entry
+	loop
 	body
 The dominators of endif are:
 	endif

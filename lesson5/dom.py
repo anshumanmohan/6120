@@ -89,7 +89,7 @@ def find_doms(func):
 
     cfg, _ = get_cfg(label2block)
 
-    return (entry_label, find_doms_helper(cfg, entry_label))
+    return (entry_label, cfg, find_doms_helper(cfg, entry_label))
 
 
 def main():
@@ -97,7 +97,7 @@ def main():
     prog = json.load(sys.stdin)
 
     for func in prog['functions']:
-        (_, doms) = find_doms(func)
+        (_, _, doms) = find_doms(func)
         print_doms(doms, "")
 
 

@@ -33,37 +33,45 @@ entry has no strict dominators.
 The strict dominators of loop are:
 	entry
 The strict dominators of body are:
-	loop
 	entry
+	loop
 The strict dominators of then are:
-	loop
-	entry
 	body
+	entry
+	loop
 The strict dominators of endif are:
-	loop
-	entry
 	body
-The strict dominators of exit are:
-	loop
 	entry
+	loop
+The strict dominators of exit are:
+	entry
+	loop
 
 
 entry is the entry label and therefore has no immediate dominators
 The immediate dominators of loop are:
 	entry
 The immediate dominators of body are:
-	loop
 	entry
+	loop
 The immediate dominators of then are:
-	loop
-	entry
 	body
+	entry
+	loop
 The immediate dominators of endif are:
-	loop
-	entry
 	body
-The immediate dominators of exit are:
-	loop
 	entry
+	loop
+The immediate dominators of exit are:
+	entry
+	loop
+
+
+The dominance frontier of loop is:
+	body
+	endif
+	loop
+The dominance frontier of endif is:
+	then
 
 

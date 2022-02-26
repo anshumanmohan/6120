@@ -28,3 +28,8 @@ The immediate dominators of while.finish are:
 	while.cond
 
 
+The dominance frontier of while.cond is:
+	while.body
+	while.cond
+
+

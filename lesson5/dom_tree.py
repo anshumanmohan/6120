@@ -1,6 +1,17 @@
 from dom import *
 
 
+def print_dom_frontier(doms):
+    for v in doms:
+        if doms[v]:
+            print(f"The dominance frontier of {v} is:")
+            for b in doms[v]:
+                print(f"\t{b}")
+        else:
+            print(f"{v} has no blocks in its dominance frontier.")
+    print("\n")
+
+
 def find_strict_doms(doms):
     doms = copy.deepcopy(doms)
     for label in doms:
@@ -13,7 +24,6 @@ def find_immediate_doms(strict_doms):
     for v1 in strict_doms:
         for v2 in strict_doms:
             if v1 in strict_doms[v2] and (v1 not in strict_doms[v3] for v3 in strict_doms[v2]):
-                # ...
                 if v2 in immediate_doms.keys():
                     immediate_doms[v2] = immediate_doms[v2].union({v1})
                 else:
@@ -21,12 +31,33 @@ def find_immediate_doms(strict_doms):
     return immediate_doms
 
 
+def dominates_a_pred(cfg, doms, v1, v2):
+    # does there exist some v3, such that v1 dominates v3 and v3 is in the preds of v2?
+    v3_candidates = list(cfg[v2].predecessors)
+    for v3 in v3_candidates:
+        if v1 in doms[v3]:
+            return True
+    return False
+
+
+def find_dom_frontier(cfg, doms, strict_doms):
+    dom_frontier = {}
+    for v1 in strict_doms:
+        for v2 in strict_doms:
+            if (v1 not in strict_doms[v2] and dominates_a_pred(cfg, doms, v1, v2)):
+                if v2 in dom_frontier.keys():
+                    dom_frontier[v2] = dom_frontier[v2].union({v1})
+                else:
+                    dom_frontier[v2] = {v1}
+    return dom_frontier
+
+
 def main():
     # Load the program JSON
     prog = json.load(sys.stdin)
 
     for func in prog['functions']:
-        (entry_label, doms) = find_doms(func)
+        (entry_label, cfg, doms) = find_doms(func)
         strict_doms = find_strict_doms(doms)
         print_doms(strict_doms, "strict ")
         immediate_doms = find_immediate_doms(strict_doms)
@@ -34,6 +65,9 @@ def main():
         print(
             f"{entry_label} is the entry label and therefore has no immediate dominators")
         print_doms(immediate_doms, "immediate ")
+
+        dom_frontier = find_dom_frontier(cfg, doms, strict_doms)
+        print_dom_frontier(dom_frontier)
 
 
 if __name__ == '__main__':

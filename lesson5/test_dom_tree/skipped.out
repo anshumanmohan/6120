@@ -18,3 +18,8 @@ end has no strict dominators.
 l0 is the entry label and therefore has no immediate dominators
 
 
+The dominance frontier of end is:
+	l0
+	l1
+
+
