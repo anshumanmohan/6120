@@ -21,7 +21,10 @@ The strict dominators of while.finish are:
 	while.cond
 
 
+while.cond is the entry label and therefore has no immediate dominators
 The immediate dominators of while.body are:
 	while.cond
 The immediate dominators of while.finish are:
 	while.cond
+
+

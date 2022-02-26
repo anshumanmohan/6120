@@ -44,10 +44,11 @@ The strict dominators of endif are:
 	entry
 	loop
 The strict dominators of exit are:
-	loop
 	entry
+	loop
 
 
+entry is the entry label and therefore has no immediate dominators
 The immediate dominators of loop are:
 	entry
 The immediate dominators of body are:
@@ -64,3 +65,5 @@ The immediate dominators of endif are:
 The immediate dominators of exit are:
 	entry
 	loop
+
+

@@ -20,5 +20,7 @@ The dominators of while.body are:
 	while.body
 	while.cond
 The dominators of while.finish are:
-	while.finish
 	while.cond
+	while.finish
+
+

@@ -15,3 +15,6 @@ l1 has no strict dominators.
 end has no strict dominators.
 
 
+l0 is the entry label and therefore has no immediate dominators
+
+

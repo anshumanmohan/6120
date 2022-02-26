@@ -1,8 +1,8 @@
 from dom import *
 
 
-def find_strict_doms(func):
-    doms = find_doms(func)
+def find_strict_doms(doms):
+    doms = copy.deepcopy(doms)
     for label in doms:
         doms[label] = doms[label] - {label}
     return doms
@@ -26,9 +26,13 @@ def main():
     prog = json.load(sys.stdin)
 
     for func in prog['functions']:
-        strict_doms = find_strict_doms(func)
+        (entry_label, doms) = find_doms(func)
+        strict_doms = find_strict_doms(doms)
         print_doms(strict_doms, "strict ")
         immediate_doms = find_immediate_doms(strict_doms)
+
+        print(
+            f"{entry_label} is the entry label and therefore has no immediate dominators")
         print_doms(immediate_doms, "immediate ")
 
 

@@ -4,7 +4,6 @@ import copy
 
 
 def print_doms(doms, s):
-    print("\n")
     for v in doms:
         if doms[v]:
             print(f"The {s}dominators of {v} are:")
@@ -12,6 +11,7 @@ def print_doms(doms, s):
                 print(f"\t{b}")
         else:
             print(f"{v} has no {s}dominators.")
+    print("\n")
 
 
 def print_labeled_prog(label2block):
@@ -19,6 +19,7 @@ def print_labeled_prog(label2block):
         print(f"{name}:")
         for row in block:
             print(f"\t{row}")
+    print("\n")
 
 
 def init_doms(cfg):
@@ -88,7 +89,7 @@ def find_doms(func):
 
     cfg, _ = get_cfg(label2block)
 
-    return find_doms_helper(cfg, entry_label)
+    return (entry_label, find_doms_helper(cfg, entry_label))
 
 
 def main():
@@ -96,7 +97,7 @@ def main():
     prog = json.load(sys.stdin)
 
     for func in prog['functions']:
-        doms = find_doms(func)
+        (_, doms) = find_doms(func)
         print_doms(doms, "")
 
 
