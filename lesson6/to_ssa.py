@@ -10,7 +10,9 @@ def get_vars(func):
         if 'dest' in instr:
             var = instr['dest']
             vars.add(var)
-    return list(vars)
+    ret = list(vars)
+    ret.sort()
+    return ret
 
 
 def get_var2blocks(label2block, vars):
@@ -34,7 +36,7 @@ def flatten(t):
     return [item for sublist in t for item in sublist]
 
 
-def to_ssa(func):
+def add_phi_nodes(func):
     blocks = form_blocks(func['instrs'])
     cfg, label2block = get_cfg(label_blocks(blocks))
     # the cfg of the function, and a dict from label to block
@@ -59,7 +61,9 @@ def to_ssa(func):
 
                         # we're assuming that instruction 0 is the label
                         # and so we want to go in as instruction 1.
-                        if 'op' in label2block[blocklabel][1] and label2block[blocklabel][1]['op'] == 'phi' and label2block[blocklabel][1]['dest'] == v:
+                        if 'op' in label2block[blocklabel][1] and \
+                                label2block[blocklabel][1]['op'] == 'phi' and \
+                                label2block[blocklabel][1]['dest'] == v:
                             # someone has put a phi node there but it wasn't us.
                             # we'll grow the arg and label lists of the phi node.
                             phi_instr = label2block[blocklabel][1]
@@ -89,9 +93,10 @@ def main():
     # Load the program JSON
     prog = json.load(sys.stdin)
 
+    # adding phi nodes
     for i in range(len(prog['functions'])):
         func_i = prog['functions'][i]
-        prog['functions'][i]['instrs'] = to_ssa(func_i)
+        prog['functions'][i]['instrs'] = add_phi_nodes(func_i)
 
     json.dump(prog, sys.stdout)
 
