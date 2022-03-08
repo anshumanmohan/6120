@@ -19,15 +19,25 @@ def find_strict_doms(doms):
     return doms
 
 
+def does_not_strictly_dom_any_strict_dom(strict_doms, v1, v2):
+    for dom in strict_doms[v2]:
+        if v1 in strict_doms[dom]:
+            return False
+    return True
+
+
 def find_immediate_doms(strict_doms):
     immediate_doms = {}
     for v1 in strict_doms:
-        for v2 in strict_doms:
-            if v1 in strict_doms[v2] and (v1 not in strict_doms[v3] for v3 in strict_doms[v2]):
+        for v2 in strict_doms:  # v2 = body, v1 = loop
+            # print(f"Checking if {v1} is the idom of {v2}")
+            if v1 in strict_doms[v2] and does_not_strictly_dom_any_strict_dom(strict_doms, v1, v2):
                 if v2 in immediate_doms.keys():
                     immediate_doms[v2] = immediate_doms[v2].union({v1})
+                    # print(f"\tit is!")
                 else:
                     immediate_doms[v2] = {v1}
+                    # print(f"\tit is!")
     return immediate_doms
 
 
@@ -45,10 +55,10 @@ def find_dom_frontier(cfg, doms, strict_doms):
     for v1 in strict_doms:
         for v2 in strict_doms:
             if (v1 not in strict_doms[v2] and dominates_a_pred(cfg, doms, v1, v2)):
-                if v2 in dom_frontier.keys():
-                    dom_frontier[v2] = dom_frontier[v2].union({v1})
+                if v1 in dom_frontier.keys():
+                    dom_frontier[v1] = dom_frontier[v1].union({v2})
                 else:
-                    dom_frontier[v2] = {v1}
+                    dom_frontier[v1] = {v2}
     return dom_frontier
 
 
@@ -63,7 +73,7 @@ def main():
         immediate_doms = find_immediate_doms(strict_doms)
 
         print(
-            f"{entry_label} is the entry label and therefore has no immediate dominators")
+            f"{entry_label} is the entry label and therefore has no immediate dominator")
         print_doms(immediate_doms, "immediate ")
 
         dom_frontier = find_dom_frontier(cfg, doms, strict_doms)
