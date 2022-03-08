@@ -56,12 +56,30 @@ def to_ssa(func):
                         continue
                     else:
                         touched.append(blocklabel)
-                        # label2block[blocklabel].append
-                        # {'args': [val_i],
-                        #  'dest': instr['dest'],
-                        #  'op': 'id',
-                        #  'type': instr['type']}
-                        print(f"Added a {v}-flavored phi node to {blocklabel}")
+
+                        # we're assuming that instruction 0 is the label
+                        # and so we want to go in as instruction 1.
+                        if 'op' in label2block[blocklabel][1] and label2block[blocklabel][1]['op'] == 'phi' and label2block[blocklabel][1]['dest'] == v:
+                            # someone has put a phi node there but it wasn't us.
+                            # we'll grow the arg and label lists of the phi node.
+                            phi_instr = label2block[blocklabel][1]
+                            phi_instr['labels'].append(d)
+                            phi_instr['args'].append(v)
+                            print(
+                                f"Expanded an old {v}-flavored phi node in {blocklabel}")
+                        else:
+                            # there isn't a phi node there at all.
+                            phi_instr = {"args": [v],
+                                         "dest": v,
+                                         "labels": [d],
+                                         "op": "phi",
+                                         "type": "int"
+                                         }
+                            # create it, add it as instr #1
+                            label2block[blocklabel] = [label2block[blocklabel][0]] + \
+                                [phi_instr] + label2block[blocklabel][1:]
+                            print(
+                                f"Added a new {v}-flavored phi node to {blocklabel}")
                     if blocklabel not in var2blocks[v]:
                         var2blocks[v].append(blocklabel)
     return flatten(list(label2block.values()))
@@ -74,6 +92,8 @@ def main():
     for i in range(len(prog['functions'])):
         func_i = prog['functions'][i]
         prog['functions'][i]['instrs'] = to_ssa(func_i)
+
+    json.dump(prog, sys.stdout)
 
 
 if __name__ == '__main__':
