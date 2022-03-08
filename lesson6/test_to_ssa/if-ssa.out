@@ -1,1 +1,2 @@
-The variables of this function are: ['a.1', 'a.2', 'a.4', 'a.3']
+Added a a.2-flavored phi node to exit
+Added a a.3-flavored phi node to exit

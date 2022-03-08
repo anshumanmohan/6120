@@ -1,1 +1,4 @@
-The variables of this function are: ['max', 'i', 'cond']
+Added a max-flavored phi node to loop
+Added a i-flavored phi node to loop
+Added a i-flavored phi node to loop
+Added a cond-flavored phi node to loop

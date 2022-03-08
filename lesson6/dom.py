@@ -81,8 +81,8 @@ def find_doms(func):
     blocks = form_blocks(func['instrs'])
     label2block = label_blocks(blocks)
 
-    print("After adding labels, the program looks like:")
-    print_labeled_prog(label2block)
+    # print("After adding labels, the program looks like:")
+    # print_labeled_prog(label2block)
 
     entry_label = label2block[0][0]
     # print(f"Its entry label is {entry_label}")
