@@ -17,8 +17,8 @@ def get_vars(func):
 
     # defs = {}
     # a dictionary, where
-    # key = a variable
-    # value = a list of blocks that assign to v
+    # key = a variable string
+    # value = a list of block-labels for blocks that assign to v
 
 
 def to_ssa(func):
