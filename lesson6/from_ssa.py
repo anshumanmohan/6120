@@ -3,7 +3,7 @@ from dom_extensions import *
 import copy
 
 
-def ssa(func):
+def from_ssa(func):
     return func
 
 
@@ -12,7 +12,7 @@ def main():
     prog = json.load(sys.stdin)
 
     for func in prog['functions']:
-        ssa(func)
+        from_ssa(func)
 
     json.dump(prog, sys.stdout)
 
