@@ -113,6 +113,15 @@ def rename(blocklabel, cfg, label2block, var2stack, idom):
     var2stack = copy.deepcopy(stashstacks)
 
 
+def remove_singleton_phi_nodes(label2block):
+    for _, block in label2block.items():
+        for instr in block:
+            if 'op' in instr and \
+                instr['op'] == 'phi' and \
+                    len(instr['args']) == 1:
+                block.remove(instr)
+
+
 def main():
     # Load the program JSON
     prog = json.load(sys.stdin)
@@ -127,6 +136,9 @@ def main():
         df = find_dom_frontier(cfg, doms, strict_doms)
 
         label2block = add_phi_nodes(func_i, df, label2block)
+
+        remove_singleton_phi_nodes(label2block)
+        remove_singleton_phi_nodes(label2block)
 
         # var2stack = {}
         # idom_flipped = find_immediate_doms(strict_doms)
