@@ -62,8 +62,8 @@ def add_phi_nodes(func, df, label2block):
                             phi_instr = label2block[blocklabel][1]
                             phi_instr['labels'].append(d)
                             phi_instr['args'].append(v)
-                            print(
-                                f"Expanded an old {v}-flavored phi node in {blocklabel}")
+                            # print(
+                            # f"Expanded an old {v}-flavored phi node in {blocklabel}")
                         else:
                             # there isn't a phi node there at all.
                             phi_instr = {"args": [v],
@@ -75,41 +75,59 @@ def add_phi_nodes(func, df, label2block):
                             # create it, add it as instr #1
                             label2block[blocklabel] = [label2block[blocklabel][0]] + \
                                 [phi_instr] + label2block[blocklabel][1:]
-                            print(
-                                f"Added a new {v}-flavored phi node to {blocklabel}")
+                            # print(
+                            # f"Added a new {v}-flavored phi node to {blocklabel}")
                     if blocklabel not in var2blocks[v]:
                         var2blocks[v].append(blocklabel)
     return label2block
 
 
-def rename(blocklabel, cfg, label2block, var2stack, idom):
+def replace_if_possible(var2stack, var):
+    if var in var2stack:
+        return var2stack[var][-1]
+    else:
+        return var
+
+
+def rename(blocklabel, cfg, label2block, var2stack, idom, ctr):
     stashstacks = copy.deepcopy(var2stack)
     block = label2block[blocklabel]
     for instr in block:
+        print(instr)
         if 'args' in instr:
             instr['args'] = \
-                list(map(lambda arg: var2stack[arg][-1], instr['args']))
+                list(map(lambda arg: replace_if_possible(
+                    var2stack, arg), instr['args']))
             # replace each arg with the top-of-stack value for that arg
         if 'dest' in instr:
-            newname = instr['dest']+"'"
+            ctr = ctr + 1
+            newname = instr['dest'] + str(ctr)
             if instr['dest'] in var2stack:
                 var2stack[instr['dest']].append(newname)
             else:
                 var2stack[instr['dest']] = [newname]
             instr['dest'] = newname
+            print(f"\tNew instr locally: {instr}")
+
             # replace dest with a new name for dest, log it in the stack
-    for succlabel in list(cfg[label].successors):
+    for succlabel in list(cfg[blocklabel].successors):
         for instr in label2block[succlabel]:
             if 'op' in instr and instr['op'] == 'phi':
                 # this is a phi node.
                 # if our stack has a value for one of its args, we'll update it.
                 # but we'll only do it once per phi node...
+                # print(instr)
                 for i in range(len(instr['args'])):
                     if instr['args'][i] in var2stack:
-                        instr['args'][i] = var2stack[instr['args'][i]]
+                        # print(
+                        # f"Will replace {instr['args'][i]} with {var2stack[instr['args'][i]][-1]}")
+                        instr['args'][i] = var2stack[instr['args'][i]][-1]
                         break
-    for idomlabel in idom[block]:
-        rename(idomlabel, cfg, label2block, var2stack, idom)
+                print(f"New instr in my successor: {instr}")
+    if blocklabel in idom:
+        for idomlabel in idom[blocklabel]:
+            ctr = ctr + 1
+            rename(idomlabel, cfg, label2block, var2stack, idom, ctr)
     var2stack = copy.deepcopy(stashstacks)
 
 
@@ -140,20 +158,23 @@ def main():
         remove_singleton_phi_nodes(label2block)
         remove_singleton_phi_nodes(label2block)
 
-        # var2stack = {}
-        # idom_flipped = find_immediate_doms(strict_doms)
-        # print(idom_flipped)
-        # # idom_flipped[me] = who immediately dominates me
-        # # we need a flipped version
-        # idom = {}
-        # for child, parent in idom_flipped.items():
-        #     parent = list(parent)[0]  # we know this is unique
-        #     if parent in idom:
-        #         idom[parent].append(child)
-        #     else:
-        #         idom[parent] = [child]
+        var2stack = {}
+        if 'args' in func_i:
+            for arg in func_i['args']:
+                var2stack[arg['name']] = [arg['name']]
 
-        # rename(entry_label, cfg, label2block, var2stack, idom)
+        idom_flipped = find_immediate_doms(strict_doms)
+        # idom_flipped[me] = who immediately dominates me
+        # we need a flipped version
+        idom = {}
+        for child, parent in idom_flipped.items():
+            parent = list(parent)[0]  # we know this is unique
+            if parent in idom:
+                idom[parent].append(child)
+            else:
+                idom[parent] = [child]
+
+        rename(entry_label, cfg, label2block, var2stack, idom, 0)
 
         new_instrs = flatten(list(label2block.values()))
         prog['functions'][i]['instrs'] = new_instrs
