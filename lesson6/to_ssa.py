@@ -36,14 +36,7 @@ def flatten(t):
     return [item for sublist in t for item in sublist]
 
 
-def add_phi_nodes(func):
-    blocks = form_blocks(func['instrs'])
-    cfg, label2block = get_cfg(label_blocks(blocks))
-    # the cfg of the function, and a dict from label to block
-
-    (entry_label, _, doms) = find_doms(func)
-    strict_doms = find_strict_doms(doms)
-    df = find_dom_frontier(cfg, doms, strict_doms)
+def add_phi_nodes(func, df, label2block):
 
     vars = get_vars(func)
     var2blocks = get_var2blocks(label2block, vars)
@@ -86,17 +79,73 @@ def add_phi_nodes(func):
                                 f"Added a new {v}-flavored phi node to {blocklabel}")
                     if blocklabel not in var2blocks[v]:
                         var2blocks[v].append(blocklabel)
-    return flatten(list(label2block.values()))
+    return label2block
+
+
+def rename(blocklabel, cfg, label2block, var2stack, idom):
+    stashstacks = copy.deepcopy(var2stack)
+    block = label2block[blocklabel]
+    for instr in block:
+        if 'args' in instr:
+            instr['args'] = \
+                list(map(lambda arg: var2stack[arg][-1], instr['args']))
+            # replace each arg with the top-of-stack value for that arg
+        if 'dest' in instr:
+            newname = instr['dest']+"'"
+            if instr['dest'] in var2stack:
+                var2stack[instr['dest']].append(newname)
+            else:
+                var2stack[instr['dest']] = [newname]
+            instr['dest'] = newname
+            # replace dest with a new name for dest, log it in the stack
+    for succlabel in list(cfg[label].successors):
+        for instr in label2block[succlabel]:
+            if 'op' in instr and instr['op'] == 'phi':
+                # this is a phi node.
+                # if our stack has a value for one of its args, we'll update it.
+                # but we'll only do it once per phi node...
+                for i in range(len(instr['args'])):
+                    if instr['args'][i] in var2stack:
+                        instr['args'][i] = var2stack[instr['args'][i]]
+                        break
+    for idomlabel in idom[block]:
+        rename(idomlabel, cfg, label2block, var2stack, idom)
+    var2stack = copy.deepcopy(stashstacks)
 
 
 def main():
     # Load the program JSON
     prog = json.load(sys.stdin)
 
-    # adding phi nodes
     for i in range(len(prog['functions'])):
         func_i = prog['functions'][i]
-        prog['functions'][i]['instrs'] = add_phi_nodes(func_i)
+        (entry_label, _, doms) = find_doms(func_i)
+        strict_doms = find_strict_doms(doms)
+        blocks = form_blocks(func_i['instrs'])
+        cfg, label2block = get_cfg(label_blocks(blocks))
+        # the cfg of the function, and a dict from label to block
+        df = find_dom_frontier(cfg, doms, strict_doms)
+
+        label2block = add_phi_nodes(func_i, df, label2block)
+
+        # var2stack = {}
+        # idom_flipped = find_immediate_doms(strict_doms)
+        # print(idom_flipped)
+        # # idom_flipped[me] = who immediately dominates me
+        # # we need a flipped version
+        # idom = {}
+        # for child, parent in idom_flipped.items():
+        #     parent = list(parent)[0]  # we know this is unique
+        #     if parent in idom:
+        #         idom[parent].append(child)
+        #     else:
+        #         idom[parent] = [child]
+
+        # rename(entry_label, cfg, label2block, var2stack, idom)
+
+        new_instrs = flatten(list(label2block.values()))
+        prog['functions'][i]['instrs'] = new_instrs
+        # assuming that the rename operation has changed label2block in place
 
     json.dump(prog, sys.stdout)
 
