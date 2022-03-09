@@ -1,0 +1,6 @@
+
+I think my code for "to_ssa" is quite close, but is not all the way there. There are a few little details to do with stack-management and dominance frontiers that I've not quite nailed down. It would have been super get it right, but sadly I need to move on to other things. My "from_ssa" looks good to me.
+
+I tested my code with turnt throughout. I made three directories, one each for to_ssa, from_ssa, and the full round trip. I copied over the examples from the reference repository, which has handy "expected programs" in SSA form. As suggested once before, I used list sorting to de-noise my turnt outputs a little.
+
+I found two(!) bugs in my domination-related work from last week, one of which was exactly in the line of python poetry I was so proud of. No rest for the wicked. I'm not sure if this is what was expected, but there is some cleverness in the way I deal with phi nodes. I only add new phi nodes for new variables; for old variables I extend the args and labels arrays of existing phi nodes. This means that, at the end of the phi-node-adding pass, phi nodes that still just have singleton args are redundant and can be cleaned up. I do this in a quick additional pass before renaming. It is renaming that gave me the most trouble.
