@@ -86,28 +86,32 @@ def replace_if_possible(var2stack, var):
     if var in var2stack:
         return var2stack[var][-1]
     else:
+        # print(f"\tDid not find {var} in stack")
         return var
 
 
 def rename(blocklabel, cfg, label2block, var2stack, idom, ctr):
-    stashstacks = copy.deepcopy(var2stack)
+    whomtopop = []
+    # a list of vars that we need to pop off. multiple occurances just mean pop repeatedly
+
     block = label2block[blocklabel]
     for instr in block:
-        print(instr)
+        # print(instr)
         if 'args' in instr:
             instr['args'] = \
                 list(map(lambda arg: replace_if_possible(
                     var2stack, arg), instr['args']))
             # replace each arg with the top-of-stack value for that arg
         if 'dest' in instr:
-            ctr = ctr + 1
-            newname = instr['dest'] + str(ctr)
+            newname = instr['dest'] + "." + str(ctr)
             if instr['dest'] in var2stack:
                 var2stack[instr['dest']].append(newname)
             else:
                 var2stack[instr['dest']] = [newname]
+            # print(f"Added {newname} to the stack for var {instr['dest']}")
+            whomtopop.append(instr['dest'])
             instr['dest'] = newname
-            print(f"\tNew instr locally: {instr}")
+            # print(f"\tNew instr locally: {instr}")
 
             # replace dest with a new name for dest, log it in the stack
     for succlabel in list(cfg[blocklabel].successors):
@@ -123,12 +127,15 @@ def rename(blocklabel, cfg, label2block, var2stack, idom, ctr):
                         # f"Will replace {instr['args'][i]} with {var2stack[instr['args'][i]][-1]}")
                         instr['args'][i] = var2stack[instr['args'][i]][-1]
                         break
-                print(f"New instr in my successor: {instr}")
+                # print(f"New instr in my successor: {instr}")
+
     if blocklabel in idom:
         for idomlabel in idom[blocklabel]:
             ctr = ctr + 1
             rename(idomlabel, cfg, label2block, var2stack, idom, ctr)
-    var2stack = copy.deepcopy(stashstacks)
+
+    for item2pop in whomtopop:
+        _ = var2stack[item2pop].pop()
 
 
 def remove_singleton_phi_nodes(label2block):
@@ -152,7 +159,7 @@ def main():
         cfg, label2block = get_cfg(label_blocks(blocks))
         # the cfg of the function, and a dict from label to block
         df = find_dom_frontier(cfg, doms, strict_doms)
-
+        # print_dom_frontier(df)
         label2block = add_phi_nodes(func_i, df, label2block)
 
         remove_singleton_phi_nodes(label2block)
@@ -174,7 +181,7 @@ def main():
             else:
                 idom[parent] = [child]
 
-        rename(entry_label, cfg, label2block, var2stack, idom, 0)
+        rename(entry_label, cfg, label2block, var2stack, idom, 1)
 
         new_instrs = flatten(list(label2block.values()))
         prog['functions'][i]['instrs'] = new_instrs
