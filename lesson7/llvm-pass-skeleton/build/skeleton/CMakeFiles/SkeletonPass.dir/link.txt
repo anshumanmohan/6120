@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++  -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -bundle -Wl,-headerpad_max_install_names -undefined dynamic_lookup -o libSkeletonPass.so CMakeFiles/SkeletonPass.dir/Skeleton.cpp.o   -L/usr/local/opt/llvm@11/lib 
