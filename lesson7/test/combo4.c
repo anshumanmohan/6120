@@ -1,7 +1,8 @@
 int func()
 {
   int x = 42 / 3;
-  return x;
+  float y = 42.0 / 3.0;
+  return x / y;
 }
 
 int main()
