@@ -5,3 +5,4 @@ dom.cpython-310.pyc
 lesson6/__pycache__
 settings.json
 lesson7/llvm-pass-skeleton/build/skeleton/CMakeFiles
+*.o

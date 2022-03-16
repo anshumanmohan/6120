@@ -19,10 +19,10 @@ namespace
       LLVMContext &Ctx = F.getContext();
       auto logintdiv = F.getParent()->getOrInsertFunction("logintdiv",
                                                           Type::getVoidTy(Ctx),
-                                                          Type::getInt32Ty(Ctx));
+                                                          Type::getVoidTy(Ctx));
       auto logfloatdiv = F.getParent()->getOrInsertFunction("logfloatdiv",
                                                             Type::getVoidTy(Ctx),
-                                                            Type::getInt32Ty(Ctx));
+                                                            Type::getVoidTy(Ctx));
 
       for (auto &B : F)
       {
@@ -31,8 +31,7 @@ namespace
           if (auto *op = dyn_cast<BinaryOperator>(&I))
           {
             IRBuilder<> builder(op);
-            Value *args = {op};
-            builder.CreateCall(logfloatdiv, args);
+            builder.CreateCall(logintdiv);
           }
         }
       }
