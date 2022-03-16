@@ -314,4 +314,25 @@ skeleton/CMakeFiles/SkeletonPass.dir/Skeleton.cpp.o: \
   /usr/local/opt/llvm@11/include/llvm/IR/OperandTraits.h \
   /usr/local/opt/llvm@11/include/llvm/IR/LegacyPassManager.h \
   /usr/local/opt/llvm@11/include/llvm/Transforms/IPO/PassManagerBuilder.h \
-  /usr/local/opt/llvm@11/include/llvm-c/Transforms/PassManagerBuilder.h
+  /usr/local/opt/llvm@11/include/llvm-c/Transforms/PassManagerBuilder.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/InstrTypes.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/Constants.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/IRBuilder.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/ConstantFolder.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/IRBuilderFolder.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/DataLayout.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/GlobalVariable.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/Instructions.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/IntrinsicInst.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/FPEnv.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/Intrinsics.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/IntrinsicEnums.inc \
+  /usr/local/opt/llvm@11/include/llvm/IR/Module.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/Comdat.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/GlobalAlias.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/GlobalIndirectSymbol.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/GlobalIFunc.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/ProfileSummary.h \
+  /usr/local/opt/llvm@11/include/llvm/Support/CodeGen.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/Operator.h \
+  /usr/local/opt/llvm@11/include/llvm/IR/ValueHandle.h

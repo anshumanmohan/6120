@@ -1,11 +1,11 @@
-int func()
+int func(int a)
 {
-  int x = 42;
+  int x = a;
   return x;
 }
 
 int main()
 {
-  int a = func();
+  int a = func(42);
   return a;
 }
