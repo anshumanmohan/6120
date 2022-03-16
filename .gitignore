@@ -3,3 +3,5 @@ lesson3/__pycache__
 make_cfg.cpython-310.pyc
 dom.cpython-310.pyc
 lesson6/__pycache__
+settings.json
+lesson7/llvm-pass-skeleton/build/skeleton/CMakeFiles
