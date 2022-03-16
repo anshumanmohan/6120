@@ -17,25 +17,23 @@ namespace
     virtual bool runOnFunction(Function &F)
     {
       LLVMContext &Ctx = F.getContext();
-      auto logintdiv = F.getParent()->getOrInsertFunction("logintdiv",
-                                                          Type::getVoidTy(Ctx),
-                                                          Type::getVoidTy(Ctx));
-      auto logfloatdiv = F.getParent()->getOrInsertFunction("logfloatdiv",
-                                                            Type::getVoidTy(Ctx),
-                                                            Type::getVoidTy(Ctx));
-
+      auto logmemoryload = F.getParent()->getOrInsertFunction("logmemoryload",
+                                                              Type::getVoidTy(Ctx),
+                                                              Type::getVoidTy(Ctx));
       for (auto &B : F)
       {
         for (auto &I : B)
         {
-          if (auto *op = dyn_cast<BinaryOperator>(&I))
+          if (auto *op = dyn_cast<Instruction>(&I))
           {
             IRBuilder<> builder(op);
-            builder.CreateCall(logintdiv);
+            if (op->getOpcode() == Instruction::Load)
+            {
+              builder.CreateCall(logmemoryload);
+            }
           }
         }
       }
-      outs() << "I saw a function called " << F.getName() << "!\n";
       return false;
     }
   };

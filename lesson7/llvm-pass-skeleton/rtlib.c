@@ -1,11 +1,6 @@
 #include <stdio.h>
 
-void logintdiv()
+void logmemoryload()
 {
-  printf("Computed an integer division\n");
-}
-
-void logfloatdiv()
-{
-  printf("Computed a floating-point division\n");
+  printf("Someone loaded from memory!\n");
 }
