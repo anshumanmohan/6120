@@ -6,3 +6,9 @@ lesson6/__pycache__
 settings.json
 lesson7/llvm-pass-skeleton/build/skeleton/CMakeFiles
 *.o
+lesson8/llvm-pass-skeleton/build/CMakeFiles
+lesson8/llvm-pass-skeleton/build/skeleton/CMakeFiles
+CMakeLists.txt
+cmake_install.cmake
+CMakeCache.txt
+libSkeletonPass.so

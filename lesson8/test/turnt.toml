@@ -1,0 +1,1 @@
+command = "/usr/local/opt/llvm@11/bin/clang -Xclang -load -Xclang ../llvm-pass-skeleton/build/skeleton/libSkeletonPass.* -c {filename}"
