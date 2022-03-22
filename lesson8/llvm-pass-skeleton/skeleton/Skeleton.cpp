@@ -5,40 +5,41 @@
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/Analysis/LoopPass.h"
+#include "llvm/Analysis/LoopInfo.h"
 using namespace llvm;
 
 namespace
 {
-  struct SkeletonPass : public FunctionPass
+  struct LICM : public FunctionPass
   {
     static char ID;
-    SkeletonPass() : FunctionPass(ID) {}
+    LICM() : FunctionPass(ID) {}
+
+    void getAnalysisUsage(AnalysisUsage &AU) const
+    {
+      AU.addRequired<LoopInfoWrapperPass>();
+      AU.setPreservesAll();
+    }
 
     virtual bool runOnFunction(Function &F)
     {
-      errs() << "I saw a function called " << F.getName() << "!\n";
+      errs() << "I saw a function called " << F.getName() << "!!\n";
 
-      for (auto &B : F)
-      {
-        for (auto &I : B)
-        {
-          errs() << "I saw an instruction!!\n";
-        }
-      }
       return false;
     }
   };
 }
 
-char SkeletonPass::ID = 0;
+char LICM::ID = 0;
 
 // Automatically enable the pass.
 // http://adriansampson.net/blog/clangpass.html
-static void registerSkeletonPass(const PassManagerBuilder &,
-                                 legacy::PassManagerBase &PM)
+static void registerLICM(const PassManagerBuilder &,
+                         legacy::PassManagerBase &PM)
 {
-  PM.add(new SkeletonPass());
+  PM.add(new LICM());
 }
 static RegisterStandardPasses
     RegisterMyPass(PassManagerBuilder::EP_EarlyAsPossible,
-                   registerSkeletonPass);
+                   registerLICM);
