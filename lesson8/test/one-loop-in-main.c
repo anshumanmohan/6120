@@ -9,7 +9,8 @@ int main()
   for (; a < 100;)
   {
     int b = add(3, 3);
-    a = a + b;
+    int c = 3 + 3;
+    a = a + b + c;
   }
   return a;
 }

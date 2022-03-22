@@ -2,26 +2,17 @@ I saw a function called add
 	the function has 0 loop(s) total
 I saw a function called main
 	I'm a block inside loop #1
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
+		I'm an instruction inside that block with LI operands
 	I'm a block inside loop #1
-		I'm an instruction inside that block
+		I'm an instruction inside that block with LI operands
 	I'm a block inside loop #1
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
+		I'm an instruction inside that block with LI operands
+		I'm an instruction inside that block with LI operands
 	I'm a block inside loop #2
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
+		I'm an instruction inside that block with LI operands
 	I'm a block inside loop #2
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
-		I'm an instruction inside that block
+		I'm an instruction inside that block with LI operands
+		I'm an instruction inside that block with LI operands
+		I'm an instruction inside that block with LI operands
+		I'm an instruction inside that block with LI operands
 	the function has 2 loop(s) total

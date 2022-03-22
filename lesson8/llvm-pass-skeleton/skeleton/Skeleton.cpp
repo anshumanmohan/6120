@@ -43,7 +43,13 @@ namespace
                i != b_end;
                i++)
           {
-            outs() << "\t\tI'm an instruction inside that block\n";
+            if (auto *op = dyn_cast<Instruction>(i))
+            {
+              if (L->Loop::hasLoopInvariantOperands(op))
+              {
+                outs() << "\t\tI'm an instruction inside that block with LI operands\n";
+              }
+            }
           }
         }
       }
