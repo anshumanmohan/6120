@@ -18,13 +18,14 @@ namespace
 
     void getAnalysisUsage(AnalysisUsage &AU) const
     {
+      AU.setPreservesCFG();
       AU.addRequired<LoopInfoWrapperPass>();
-      AU.setPreservesAll();
     }
 
     virtual bool runOnFunction(Function &F)
     {
-      outs() << "I saw a function called " << F.getName() << "\n";
+      bool changed = false;
+      errs() << "I saw a function called " << F.getName() << "\n";
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
       int loopCounter = 0;
       for (LoopInfo::iterator l = LI.begin(), li_end = LI.end();
@@ -37,24 +38,35 @@ namespace
              b != l_end;
              b++)
         {
-          outs() << "\tI'm a block inside loop #" << loopCounter << "\n";
+          errs() << "\tI'm a block inside loop #" << loopCounter << "\n";
           BasicBlock *B = *b;
           for (BasicBlock::iterator i = B->begin(), b_end = B->end();
-               i != b_end;
-               i++)
-          {
-            if (auto *op = dyn_cast<Instruction>(i))
+               i != b_end;)
+          { // Note the weird increment of i.
+            // This tolerates the deletion of op.
+            if (auto *op = dyn_cast<Instruction>(i++))
             {
               if (L->Loop::hasLoopInvariantOperands(op))
               {
-                outs() << "\t\tI'm an instruction inside that block with LI operands\n";
+                errs() << "\t\tI'm an instruction inside that block with LI operands\n";
+                // let's lift this above the loop
+                if (BasicBlock *pre = L->getLoopPreheader())
+                {
+                  Instruction *end_of_pre = pre->getTerminator();
+                  op->insertBefore(end_of_pre);
+                  changed = true;
+                  errs() << "\t\tI've been moved\n";
+                  // op->removeFromParent();
+                  // op->eraseFromParent();
+                  // op->moveBefore(end_of_pre);
+                }
               }
             }
           }
         }
       }
-      outs() << "\tthe function has " << loopCounter << " loop(s) total\n";
-      return false;
+      errs() << "\tthe function has " << loopCounter << " loop(s) total\n";
+      return changed;
     }
   };
 }
