@@ -1,4 +1,11 @@
 I saw a function called func
-	it has 1 loop(s)
+	reporting from loop #1
+	reporting from loop #1
+	the function has 1 loop(s) total
 I saw a function called main
-	it has 2 loop(s)
+	reporting from loop #1
+	reporting from loop #1
+	reporting from loop #1
+	reporting from loop #2
+	reporting from loop #2
+	the function has 2 loop(s) total

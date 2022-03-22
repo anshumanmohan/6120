@@ -27,11 +27,16 @@ namespace
       outs() << "I saw a function called " << F.getName() << "\n";
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
       int loopCounter = 0;
-      for (LoopInfo::iterator i = LI.begin(), e = LI.end(); i != e; i++)
+      for (LoopInfo::iterator i = LI.begin(), li_end = LI.end(); i != li_end; i++)
       {
+        Loop *L = *i;
         loopCounter++;
+        for (Loop::block_iterator b = L->block_begin(), b_end = L->block_end(); b != b_end; b++)
+        {
+          outs() << "\treporting from loop #" << loopCounter << "\n";
+        }
       }
-      outs() << "\tit has " << loopCounter << " loop(s)\n";
+      outs() << "\tthe function has " << loopCounter << " loop(s) total\n";
 
       return false;
     }

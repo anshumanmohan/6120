@@ -1,4 +1,6 @@
 I saw a function called add
-	it has 0 loop(s)
+	the function has 0 loop(s) total
 I saw a function called main
-	it has 1 loop(s)
+	reporting from loop #1
+	reporting from loop #1
+	the function has 1 loop(s) total
