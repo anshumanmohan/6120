@@ -24,7 +24,14 @@ namespace
 
     virtual bool runOnFunction(Function &F)
     {
-      errs() << "I saw a function called " << F.getName() << "!!\n";
+      outs() << "I saw a function called " << F.getName() << "\n";
+      LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+      int loopCounter = 0;
+      for (LoopInfo::iterator i = LI.begin(), e = LI.end(); i != e; i++)
+      {
+        loopCounter++;
+      }
+      outs() << "\tit has " << loopCounter << " loops\n";
 
       return false;
     }
