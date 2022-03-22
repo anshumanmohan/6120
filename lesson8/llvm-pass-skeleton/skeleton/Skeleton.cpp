@@ -31,7 +31,7 @@ namespace
       {
         loopCounter++;
       }
-      outs() << "\tit has " << loopCounter << " loops\n";
+      outs() << "\tit has " << loopCounter << " loop(s)\n";
 
       return false;
     }
