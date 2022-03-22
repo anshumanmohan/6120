@@ -53,9 +53,9 @@ namespace
                 if (BasicBlock *pre = L->getLoopPreheader())
                 {
                   Instruction *end_of_pre = pre->getTerminator();
-                  op->insertBefore(end_of_pre);
-                  changed = true;
-                  errs() << "\t\tI've been moved\n";
+                  // op->insertBefore(end_of_pre);
+                  // changed = true;
+                  // errs() << "\t\tI've been moved\n";
                   // op->removeFromParent();
                   // op->eraseFromParent();
                   // op->moveBefore(end_of_pre);
