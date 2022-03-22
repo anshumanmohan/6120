@@ -1,6 +1,16 @@
 I saw a function called add
 	the function has 0 loop(s) total
 I saw a function called main
-	reporting from loop #1
-	reporting from loop #1
+	I'm a block inside loop #1
+		I'm an instruction inside that block
+		I'm an instruction inside that block
+		I'm an instruction inside that block
+	I'm a block inside loop #1
+		I'm an instruction inside that block
+		I'm an instruction inside that block
+		I'm an instruction inside that block
+		I'm an instruction inside that block
+		I'm an instruction inside that block
+		I'm an instruction inside that block
+		I'm an instruction inside that block
 	the function has 1 loop(s) total
