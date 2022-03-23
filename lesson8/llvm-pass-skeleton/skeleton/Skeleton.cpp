@@ -43,7 +43,8 @@ namespace
           for (BasicBlock::iterator i = B->begin(), b_end = B->end();
                i != b_end;)
           { // Note the weird increment of i.
-            // This tolerates the deletion of op.
+            // This tolerates the deletion of an op
+            // while still leaving the iteration unaffected.
             if (auto *op = dyn_cast<Instruction>(i++))
             {
               if (L->Loop::hasLoopInvariantOperands(op))
