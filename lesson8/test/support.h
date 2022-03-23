@@ -72,3 +72,4 @@ int verify_benchmark(int res);
 */
 
 #define CPU_MHZ 1
+#define WARMUP_HEAT 1
