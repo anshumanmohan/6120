@@ -6,11 +6,11 @@ int add(int a, int b)
 int main()
 {
   int a = 0;
+  int b = 1;
   for (; a < 100;)
   {
-    int b = add(3, 3);
     int c = 3 + 3;
-    a = a + b + c;
+    a = a + b;
   }
   return a;
 }

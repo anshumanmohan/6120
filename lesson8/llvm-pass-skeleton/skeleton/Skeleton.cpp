@@ -7,6 +7,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Analysis/LoopPass.h"
 #include "llvm/Analysis/LoopInfo.h"
+#include "llvm/IR/Instruction.h"
 using namespace llvm;
 
 namespace
@@ -28,43 +29,45 @@ namespace
       errs() << "I saw a function called " << F.getName() << "\n";
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
       int loopCounter = 0;
-      for (LoopInfo::iterator l = LI.begin(), li_end = LI.end();
-           l != li_end;
+      for (LoopInfo::iterator l = LI.begin();
+           l != LI.end();
            l++)
       {
         Loop *L = *l;
         loopCounter++;
-        for (Loop::block_iterator b = L->block_begin(), l_end = L->block_end();
-             b != l_end;
+        for (Loop::block_iterator b = L->block_begin();
+             b != L->block_end();
              b++)
         {
           errs() << "\tI'm a block inside loop #" << loopCounter << "\n";
           BasicBlock *B = *b;
-          for (BasicBlock::iterator i = B->begin(), b_end = B->end();
-               i != b_end;)
+          for (BasicBlock::iterator i = B->begin();
+               i != B->end();)
           { // Note the weird increment of i.
             // This tolerates the deletion of an op
             // while still leaving the iteration unaffected.
-            if (auto *op = dyn_cast<Instruction>(i++))
+            if (auto *op = dyn_cast<Instruction>(i++)) // i++?
             {
+              if (L->Loop::isLoopInvariant(op))
+                continue;
+              // if (!isSafeToSpeculativelyExecute(op))
+              // continue;
+              if (op->mayReadFromMemory())
+                continue;
+              // OK so now we want to lift if we can...
+              BasicBlock *Preheader = L->Loop::getLoopPreheader();
+              // Without a preheader, hoisting is not feasible.
+              if (!Preheader)
+                continue;
+              Instruction *InsertPt = Preheader->getTerminator();
               if (L->Loop::hasLoopInvariantOperands(op))
               {
-                errs() << "\t\tI'm an instr inside the blk with LI operands\n";
-                // We can hoist this to _just before_ the _end_ of the preheader
-                if (BasicBlock *pre = L->getLoopPreheader())
-                {
-                  Instruction *end_of_pre = pre->getTerminator();
-                  // op->insertBefore(end_of_pre);
-                  // works by itself, but then the compiler loops/blocks forever
-                  // op->removeFromParent();
-                  // segfaults clang
-                  // op->eraseFromParent();
-                  // segfaults clang
-                  // op->moveBefore(end_of_pre);
-                  // comment out the "insertBefore" and run this. segfaults.
-                  // changed = true;
-                  // errs() << "\t\tI've been moved\n";
-                }
+                op->moveBefore(InsertPt);
+                errs() << "moved the instruction \n"
+                       << *op << "\n";
+                changed = true;
+                i = B->begin(); // overkill...
+                continue;
               }
             }
           }
