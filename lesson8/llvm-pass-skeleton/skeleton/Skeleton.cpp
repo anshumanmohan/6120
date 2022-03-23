@@ -48,17 +48,21 @@ namespace
             {
               if (L->Loop::hasLoopInvariantOperands(op))
               {
-                errs() << "\t\tI'm an instruction inside that block with LI operands\n";
-                // let's lift this above the loop
+                errs() << "\t\tI'm an instr inside the blk with LI operands\n";
+                // We can hoist this to _just before_ the _end_ of the preheader
                 if (BasicBlock *pre = L->getLoopPreheader())
                 {
                   Instruction *end_of_pre = pre->getTerminator();
                   // op->insertBefore(end_of_pre);
+                  // works by itself, but then the compiler loops/blocks forever
+                  // op->removeFromParent();
+                  // segfaults clang
+                  // op->eraseFromParent();
+                  // segfaults clang
+                  // op->moveBefore(end_of_pre);
+                  // comment out the "insertBefore" and run this. segfaults.
                   // changed = true;
                   // errs() << "\t\tI've been moved\n";
-                  // op->removeFromParent();
-                  // op->eraseFromParent();
-                  // op->moveBefore(end_of_pre);
                 }
               }
             }
@@ -66,6 +70,10 @@ namespace
         }
       }
       errs() << "\tthe function has " << loopCounter << " loop(s) total\n";
+      // I'm not sure why it would block or loop forever...
+      // the above line IS printed,
+      // so I can only assume that the return below also goes through.
+      // Something loops/blocks forever AFTER that.
       return changed;
     }
   };
