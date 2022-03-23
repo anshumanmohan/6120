@@ -26,7 +26,7 @@ namespace
     virtual bool runOnFunction(Function &F)
     {
       bool changed = false;
-      errs() << "I saw a function called " << F.getName() << "\n";
+      // errs() << "I saw a function called " << F.getName() << "\n";
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
       int loopCounter = 0;
       for (LoopInfo::iterator l = LI.begin();
@@ -39,41 +39,36 @@ namespace
              b != L->block_end();
              b++)
         {
-          errs() << "\tI'm a block inside loop #" << loopCounter << "\n";
+          // errs() << "\tI'm a block inside loop #" << loopCounter << "\n";
           BasicBlock *B = *b;
-          for (BasicBlock::iterator i = B->begin();
-               i != B->end();)
+          for (BasicBlock::iterator i = B->begin(); i != B->end();)
           { // Note the weird increment of i.
             // This tolerates the deletion of an op
             // while still leaving the iteration unaffected.
-            if (auto *op = dyn_cast<Instruction>(i++)) // i++?
+            if (auto *op = dyn_cast<Instruction>(i++))
             {
-              if (L->Loop::isLoopInvariant(op))
-                continue;
-              // if (!isSafeToSpeculativelyExecute(op))
-              // continue;
-              if (op->mayReadFromMemory())
-                continue;
-              // OK so now we want to lift if we can...
-              BasicBlock *Preheader = L->Loop::getLoopPreheader();
-              // Without a preheader, hoisting is not feasible.
-              if (!Preheader)
-                continue;
-              Instruction *InsertPt = Preheader->getTerminator();
               if (L->Loop::hasLoopInvariantOperands(op))
               {
+                if (strcmp(op->Instruction::getOpcodeName(), "br") == 0)
+                {
+                  // We need to specifically skip br instructions,
+                  // which sadly get tagged as invariant operators.
+                  continue;
+                }
+                // OK so now we want to lift if we can.
+                BasicBlock *Preheader = L->Loop::getLoopPreheader();
+                if (!Preheader)
+                  continue;
+                Instruction *InsertPt = Preheader->getTerminator();
                 op->moveBefore(InsertPt);
-                errs() << "moved the instruction \n"
-                       << *op << "\n";
+                errs() << "\t\tmoved the instruction:" << *op << "\n";
                 changed = true;
-                i = B->begin(); // overkill...
-                continue;
               }
             }
           }
         }
       }
-      errs() << "\tthe function has " << loopCounter << " loop(s) total\n";
+      // errs() << "\tthe function has " << loopCounter << " loop(s) total\n";
       // I'm not sure why it would block or loop forever...
       // the above line IS printed,
       // so I can only assume that the return below also goes through.
