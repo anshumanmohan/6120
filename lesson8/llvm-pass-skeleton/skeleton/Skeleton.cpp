@@ -61,7 +61,7 @@ namespace
                   continue;
                 Instruction *InsertPt = Preheader->getTerminator();
                 op->moveBefore(InsertPt);
-                errs() << "\t\tmoved the instruction:" << *op << "\n";
+                // errs() << "\t\tmoved the instruction:" << *op << "\n";
                 changed = true;
               }
             }
